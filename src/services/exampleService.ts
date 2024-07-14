@@ -1,4 +1,4 @@
-import exampleModel from "../models/exampleModel.js";
+import exampleModel from "../models/exampleModel";
 
 class ExampleService {
   async createUser(body) {
