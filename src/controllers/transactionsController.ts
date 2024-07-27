@@ -18,3 +18,22 @@ export const getAllTrx = async (
     res.status(400).json({ message: error.message });
   }
 };
+
+export const getTrxById = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  try {
+    const { id } = req.params;
+
+    const result = await transactionService.getTrxById(id);
+    if (!result) {
+      res.status(404).json({ message: "Transaction not found" });
+      return;
+    }
+
+    res.status(200).json(result);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+};

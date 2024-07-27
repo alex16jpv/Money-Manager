@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import transactionModel from "../models/TransactionModel";
 import { MODEL_NAMES } from "../utils/models";
 
@@ -55,6 +56,48 @@ class TransactionService {
         $limit: limit,
       },
     ]);
+  }
+
+  async getTrxById(id: string) {
+    const trx = await transactionModel.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $lookup: {
+          from: MODEL_NAMES.ACCOUNT,
+          localField: "from_account_id",
+          foreignField: "_id",
+          as: "from_account",
+        },
+      },
+      {
+        $lookup: {
+          from: MODEL_NAMES.ACCOUNT,
+          localField: "to_account_id",
+          foreignField: "_id",
+          as: "to_account",
+        },
+      },
+      {
+        $unwind: {
+          path: "$from_account",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $unwind: {
+          path: "$to_account",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
+
+    console.log(trx);
+
+    return trx?.[0] || null;
   }
 }
 
