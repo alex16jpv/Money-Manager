@@ -8,21 +8,16 @@ import userRoutes from "./routes/userRoutes";
 import trxRoutes from "./routes/transactionRoutes";
 import accountRoutes from "./routes/accountRoutes";
 
-const app = async () => {
-  const app = express();
+// Connect to database
+connectDB();
+const app = express();
 
-  // Connect to database
-  await connectDB();
+// // Middleware
+app.use(express.json());
 
-  // // Middleware
-  app.use(express.json());
-
-  // // Routes
-  app.use("/users", userRoutes);
-  app.use("/accounts", accountRoutes);
-  app.use("/transactions", trxRoutes);
-
-  return app;
-};
+// // Routes
+app.use("/users", userRoutes);
+app.use("/accounts", accountRoutes);
+app.use("/transactions", trxRoutes);
 
 export default app;

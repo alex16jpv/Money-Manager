@@ -1,7 +1,7 @@
 const { build } = require("esbuild");
 
 build({
-  entryPoints: ["src/server.ts"],
+  entryPoints: ["src/server.prod.ts"],
   bundle: true,
   platform: "node",
   logLevel: "info",
