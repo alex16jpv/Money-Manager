@@ -2,7 +2,7 @@ import transactionModel from "../models/TransactionModel";
 import { MODEL_NAMES } from "../utils/models";
 
 class TransactionService {
-  async getAllTrx() {
+  async getAllTrx({ limit, skip }: { limit: number; skip: number }) {
     return await transactionModel.aggregate([
       {
         $lookup: {
@@ -42,6 +42,17 @@ class TransactionService {
           from_account_name: "$from_account.name",
           to_account_name: "$to_account.name",
         },
+      },
+      {
+        $sort: {
+          date: -1,
+        },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: limit,
       },
     ]);
   }

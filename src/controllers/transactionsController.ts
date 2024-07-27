@@ -6,7 +6,12 @@ export const getAllTrx = async (
   res: express.Response
 ) => {
   try {
-    const result = await transactionService.getAllTrx();
+    const { limit = 10, skip = 0 } = req.query;
+
+    const result = await transactionService.getAllTrx({
+      limit: Number(limit),
+      skip: Number(skip),
+    });
 
     res.status(200).json(result);
   } catch (error: any) {
