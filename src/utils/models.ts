@@ -1,5 +1,5 @@
 export const MODEL_NAMES = {
-  USER: "user",
-  ACCOUNT: "account",
-  TRANSACTION: "transaction",
+  USER: "users",
+  ACCOUNT: "accounts",
+  TRANSACTION: "transactions",
 };
