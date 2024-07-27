@@ -2,7 +2,11 @@ import "dotenv/config";
 
 import express from "express";
 import connectDB from "./config/db";
-import exampleRoutes from "./routes/exampleRoutes";
+
+// Routes
+import userRoutes from "./routes/userRoutes";
+import trxRoutes from "./routes/transactionRoutes";
+import accountRoutes from "./routes/accountRoutes";
 
 const app = async () => {
   const app = express();
@@ -14,7 +18,9 @@ const app = async () => {
   app.use(express.json());
 
   // // Routes
-  app.use("/api", exampleRoutes);
+  app.use("/users", userRoutes);
+  app.use("/accounts", accountRoutes);
+  app.use("/transactions", trxRoutes);
 
   return app;
 };
