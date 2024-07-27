@@ -34,6 +34,12 @@ class TransactionService {
       },
       {
         $project: {
+          description: 1,
+          amount: 1,
+          date: 1,
+          type: 1,
+          category: 1,
+          from_account_name: "$from_account.name",
           to_account_name: "$to_account.name",
         },
       },
