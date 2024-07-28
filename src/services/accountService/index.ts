@@ -3,7 +3,11 @@ import { ACCOUNT_TYPES } from "../../utils/constants";
 
 class AccountService {
   async getAllAccounts() {
-    return accountModel.find();
+    return accountModel.aggregate([
+      {
+        $sort: { createdAt: -1 },
+      },
+    ]);
   }
 
   async getAccountById(id: string) {

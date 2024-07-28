@@ -49,6 +49,7 @@ class TransactionService {
       {
         $sort: {
           date: -1,
+          createdAt: -1,
         },
       },
       {
