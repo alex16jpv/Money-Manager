@@ -4,12 +4,12 @@ Welcome to Money Manager, your ultimate companion for keeping track of your pers
 
 ### Table of Contents
 
-- Models
-- Account Types
-- Transaction Types
-- Endpoints
-- Creating Transactions
-- Updating Balances
+- [Models](#models)
+- [Account Types](#account-types)
+- [Transaction Types](#transaction-types)
+- [Endpoints](#endpoints)
+- [Creating Transactions](#creating-transactions)
+- [Updating Balances](#updating-balances)
 
 ## Models
 
