@@ -8,9 +8,9 @@ export type TransactionType = {
   date: Date;
   category?: string;
   description?: string;
-  from_account_id?: mongoose.Schema.Types.ObjectId;
-  to_account_id?: mongoose.Schema.Types.ObjectId;
-  user_id?: mongoose.Schema.Types.ObjectId;
+  from_account_id?: string;
+  to_account_id?: string;
+  user_id?: string;
   createdAt?: Date;
   updatedAt?: Date;
   _id?: mongoose.Schema.Types.ObjectId;
@@ -55,7 +55,7 @@ const transactionSchema = new mongoose.Schema(
       required: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 const TransactionModel = mongoose.model(
