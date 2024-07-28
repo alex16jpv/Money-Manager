@@ -26,6 +26,11 @@ export const getTrxById = async (
   try {
     const { id } = req.params;
 
+    if (!id || id === "") {
+      res.status(400).json({ message: "Transaction ID is required" });
+      return;
+    }
+
     const result = await transactionService.getTrxById(id);
     if (!result) {
       res.status(404).json({ message: "Transaction not found" });
@@ -33,6 +38,37 @@ export const getTrxById = async (
     }
 
     res.status(200).json(result);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const createTrx = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  try {
+    const {
+      from_account_id = null,
+      to_account_id = null,
+      amount,
+      type,
+      description,
+      date = new Date(),
+      category,
+    } = req.body;
+
+    const result = await transactionService.createTrx({
+      from_account_id,
+      to_account_id,
+      amount,
+      date: new Date(date),
+      type,
+      description,
+      category,
+    });
+
+    res.status(201).json(result);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
