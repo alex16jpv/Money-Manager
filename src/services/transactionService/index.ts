@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import transactionModel from "../models/TransactionModel";
-import accountModel from "../models/AccountModel";
-import { MODEL_NAMES } from "../utils/models";
-import { TRANSACTION_TYPES } from "../utils/constants";
+import transactionModel from "../../models/TransactionModel";
+import accountModel from "../../models/AccountModel";
+import { MODEL_NAMES } from "../../utils/models";
+import { TRANSACTION_TYPES } from "../../utils/constants";
 
 class TransactionService {
   async getAllTrx({ limit, skip }: { limit: number; skip: number }) {
@@ -178,6 +178,8 @@ class TransactionService {
         if (!foundAccount) {
           throw new Error("from_account_id must exist");
         }
+      } else {
+        throw new Error("Invalid transaction type");
       }
 
       const result = await transactionModel.create([input], { session });

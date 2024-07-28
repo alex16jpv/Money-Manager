@@ -1,4 +1,4 @@
-import userModel from "../models/UserModel";
+import userModel from "../../models/UserModel";
 
 class UserService {
   async getAllUsers() {
