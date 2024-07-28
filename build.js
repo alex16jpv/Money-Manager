@@ -6,4 +6,6 @@ build({
   platform: "node",
   logLevel: "info",
   outfile: "dist/index.js",
+  minify: true,
+  sourcemap: false,
 });
