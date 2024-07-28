@@ -2,6 +2,20 @@ import mongoose from "mongoose";
 import { TRANSACTION_TYPES } from "../utils/constants";
 import { MODEL_NAMES } from "../utils/models";
 
+export type TransactionType = {
+  type: keyof typeof TRANSACTION_TYPES;
+  amount: number;
+  date: Date;
+  category?: string;
+  description?: string;
+  from_account_id?: mongoose.Schema.Types.ObjectId;
+  to_account_id?: mongoose.Schema.Types.ObjectId;
+  user_id?: mongoose.Schema.Types.ObjectId;
+  createdAt?: Date;
+  updatedAt?: Date;
+  _id?: mongoose.Schema.Types.ObjectId;
+};
+
 const transactionSchema = new mongoose.Schema(
   {
     type: {

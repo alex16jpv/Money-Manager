@@ -1,11 +1,19 @@
 import mongoose from "mongoose";
-import transactionModel from "../../models/TransactionModel";
+import transactionModel, {
+  TransactionType,
+} from "../../models/TransactionModel";
 import accountModel from "../../models/AccountModel";
 import { MODEL_NAMES } from "../../utils/models";
 import { TRANSACTION_TYPES } from "../../utils/constants";
 
 class TransactionService {
-  async getAllTrx({ limit, skip }: { limit: number; skip: number }) {
+  async getAllTrx({
+    limit,
+    skip,
+  }: {
+    limit: number;
+    skip: number;
+  }): Promise<TransactionType[]> {
     return await transactionModel.aggregate([
       {
         $lookup: {
@@ -61,7 +69,7 @@ class TransactionService {
     ]);
   }
 
-  async getTrxById(id: string) {
+  async getTrxById(id: string): Promise<TransactionType | null> {
     const trx = await transactionModel.aggregate([
       {
         $match: {
@@ -101,15 +109,7 @@ class TransactionService {
     return trx?.[0] || null;
   }
 
-  async createTrx(input: {
-    amount: number;
-    date: Date;
-    type: string;
-    from_account_id: string;
-    to_account_id: string;
-    description?: string;
-    category?: string;
-  }) {
+  async createTrx(input: TransactionType): Promise<TransactionType> {
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -183,7 +183,10 @@ class TransactionService {
         throw new Error("Invalid transaction type");
       }
 
-      const result = await transactionModel.create([input], { session });
+      // check the problems with types
+      const result = (await transactionModel.create([input], {
+        session,
+      })) as unknown as TransactionType;
 
       await session.commitTransaction();
       return result;
