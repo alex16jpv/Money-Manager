@@ -1,16 +1,16 @@
-import userModel from "../../models/UserModel";
+import userModel, { UserType } from "../../models/UserModel";
 
 class UserService {
-  async getAllUsers() {
+  async getAllUsers(): Promise<UserType[]> {
     return userModel.find();
   }
 
-  async createUser() {
+  async createUser(): Promise<UserType> {
     return userModel.create({
       name: "John Doe",
       email: "johndoe@test.com",
       username: "johndoe",
-    });
+    }) as unknown as UserType;
   }
 }
 

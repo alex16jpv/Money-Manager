@@ -2,7 +2,7 @@ import express from "express";
 import accountService from "../services/accountService";
 
 export const getAllAccounts = async (
-  req: express.Request,
+  _req: express.Request,
   res: express.Response
 ) => {
   try {

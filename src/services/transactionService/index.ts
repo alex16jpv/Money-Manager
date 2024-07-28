@@ -1,11 +1,20 @@
 import mongoose from "mongoose";
-import transactionModel from "../../models/TransactionModel";
+import transactionModel, {
+  TransactionType,
+} from "../../models/TransactionModel";
 import accountModel from "../../models/AccountModel";
 import { MODEL_NAMES } from "../../utils/models";
 import { TRANSACTION_TYPES } from "../../utils/constants";
+import { ProcessTrxInput } from "./types";
 
 class TransactionService {
-  async getAllTrx({ limit, skip }: { limit: number; skip: number }) {
+  async getAllTrx({
+    limit,
+    skip,
+  }: {
+    limit: number;
+    skip: number;
+  }): Promise<TransactionType[]> {
     return await transactionModel.aggregate([
       {
         $lookup: {
@@ -61,7 +70,7 @@ class TransactionService {
     ]);
   }
 
-  async getTrxById(id: string) {
+  async getTrxById(id: string): Promise<TransactionType | null> {
     const trx = await transactionModel.aggregate([
       {
         $match: {
@@ -101,20 +110,12 @@ class TransactionService {
     return trx?.[0] || null;
   }
 
-  async createTrx(input: {
-    amount: number;
-    date: Date;
-    type: string;
-    from_account_id: string;
-    to_account_id: string;
-    description?: string;
-    category?: string;
-  }) {
+  async createTrx(input: TransactionType): Promise<TransactionType> {
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
-      const { from_account_id, to_account_id, amount, date, type } = input;
+      const { amount, date, type } = input;
 
       if (date && isNaN(date.getTime())) {
         throw new Error("Date must be a valid date");
@@ -125,65 +126,19 @@ class TransactionService {
       }
 
       if (type === TRANSACTION_TYPES.TRANSFER) {
-        if (!from_account_id || !to_account_id) {
-          throw new Error(
-            "Both from_account_id and to_account_id are required"
-          );
-        }
-        if (from_account_id === to_account_id) {
-          throw new Error(
-            "from_account_id and to_account_id must be different"
-          );
-        }
-        const foundAccounts = await accountModel.find(
-          {
-            _id: { $in: [from_account_id, to_account_id] },
-          },
-          {
-            _id: 1,
-          },
-          { session }
-        );
-        if (foundAccounts.length !== 2) {
-          throw new Error("From and to accounts must exist");
-        }
+        await this.processTransferTrx({ input, session });
       } else if (type === TRANSACTION_TYPES.INCOME) {
-        if (!to_account_id) {
-          throw new Error("to_account_id is required for income transactions");
-        }
-
-        if (from_account_id) {
-          throw new Error(
-            "from_account_id is not allowed for income transactions"
-          );
-        }
-
-        const foundAccount = await accountModel.findById(to_account_id);
-        if (!foundAccount) {
-          throw new Error("to_account_id must exist");
-        }
+        await this.processIncomeTrx({ input, session });
       } else if (type === TRANSACTION_TYPES.EXPENSE) {
-        if (!from_account_id) {
-          throw new Error(
-            "from_account_id is required for expense transactions"
-          );
-        }
-
-        if (to_account_id) {
-          throw new Error(
-            "to_account_id is not allowed for expense transactions"
-          );
-        }
-
-        const foundAccount = await accountModel.findById(from_account_id);
-        if (!foundAccount) {
-          throw new Error("from_account_id must exist");
-        }
+        await this.processExpenseTrx({ input, session });
       } else {
         throw new Error("Invalid transaction type");
       }
 
-      const result = await transactionModel.create([input], { session });
+      // check the problems with types
+      const result = (await transactionModel.create([input], {
+        session,
+      })) as unknown as TransactionType;
 
       await session.commitTransaction();
       return result;
@@ -193,6 +148,115 @@ class TransactionService {
     } finally {
       await session.endSession();
     }
+  }
+
+  async processTransferTrx({ input, session }: ProcessTrxInput): Promise<void> {
+    const { from_account_id, to_account_id } = input;
+    if (!from_account_id || !to_account_id) {
+      throw new Error("Both from_account_id and to_account_id are required");
+    }
+    if (from_account_id === to_account_id) {
+      throw new Error("from_account_id and to_account_id must be different");
+    }
+    const foundAccounts = await accountModel.find(
+      {
+        _id: { $in: [from_account_id, to_account_id] },
+      },
+      {
+        _id: 1,
+      }
+    );
+    if (foundAccounts.length !== 2) {
+      throw new Error("From and to accounts must exist");
+    }
+
+    const fromAccount = foundAccounts.find((account) =>
+      account._id.equals(from_account_id as string)
+    );
+    const toAccount = foundAccounts.find((account) =>
+      account._id.equals(to_account_id)
+    );
+
+    await fromAccount?.updateOne(
+      {
+        $inc: {
+          balance: -input.amount,
+        },
+      },
+      {
+        session,
+      }
+    );
+    await toAccount?.updateOne(
+      {
+        $inc: {
+          balance: input.amount,
+        },
+      },
+      {
+        session,
+      }
+    );
+  }
+
+  async processIncomeTrx({ input, session }: ProcessTrxInput): Promise<void> {
+    const { to_account_id, from_account_id } = input;
+    if (!to_account_id) {
+      throw new Error("to_account_id is required for income transactions");
+    }
+
+    if (from_account_id) {
+      throw new Error("from_account_id is not allowed for income transactions");
+    }
+
+    const foundAccount = await accountModel.findById(to_account_id, {
+      _id: 1,
+    });
+    if (!foundAccount) {
+      throw new Error("to_account_id must exist");
+    }
+
+    await foundAccount.updateOne(
+      {
+        $inc: {
+          balance: input.amount,
+        },
+      },
+      {
+        session,
+      }
+    );
+  }
+
+  async processExpenseTrx({ input, session }: ProcessTrxInput): Promise<void> {
+    const { from_account_id, to_account_id } = input;
+
+    if (!from_account_id) {
+      throw new Error("from_account_id is required for expense transactions");
+    }
+
+    if (to_account_id) {
+      throw new Error("to_account_id is not allowed for expense transactions");
+    }
+
+    const foundAccount = await accountModel.findById(from_account_id, {
+      _id: 1,
+    });
+
+    if (!foundAccount) {
+      throw new Error("from_account_id must exist");
+    }
+
+    await foundAccount.updateOne(
+      {
+        $inc: {
+          balance: -input.amount,
+        },
+      },
+      {
+        session,
+      }
+    );
   }
 }
 

@@ -2,7 +2,7 @@ import express from "express";
 import userService from "../services/userService";
 
 export const getAllUsers = async (
-  req: express.Request,
+  _req: express.Request,
   res: express.Response
 ) => {
   try {
@@ -15,7 +15,7 @@ export const getAllUsers = async (
 };
 
 export const createUser = async (
-  req: express.Request,
+  _req: express.Request,
   res: express.Response
 ) => {
   try {

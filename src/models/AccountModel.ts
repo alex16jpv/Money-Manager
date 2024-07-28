@@ -2,6 +2,16 @@ import mongoose from "mongoose";
 import { ACCOUNT_TYPES } from "../utils/constants";
 import { MODEL_NAMES } from "../utils/models";
 
+export type AccountType = {
+  name: string;
+  type: keyof typeof ACCOUNT_TYPES;
+  balance?: number;
+  user_id?: mongoose.Schema.Types.ObjectId;
+  createdAt?: Date;
+  updatedAt?: Date;
+  _id?: mongoose.Schema.Types.ObjectId;
+};
+
 const accountSchema = new mongoose.Schema(
   {
     name: {
@@ -23,7 +33,7 @@ const accountSchema = new mongoose.Schema(
       required: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 const AccountModel = mongoose.model(MODEL_NAMES.ACCOUNT, accountSchema);

@@ -1,6 +1,15 @@
 import mongoose from "mongoose";
 import { MODEL_NAMES } from "../utils/models";
 
+export type UserType = {
+  name: string;
+  username: string;
+  email: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  _id?: mongoose.Schema.Types.ObjectId;
+};
+
 const userSchema = new mongoose.Schema(
   {
     name: {

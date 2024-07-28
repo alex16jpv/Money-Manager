@@ -1,8 +1,8 @@
-import accountModel from "../../models/AccountModel";
+import accountModel, { AccountType } from "../../models/AccountModel";
 import { ACCOUNT_TYPES } from "../../utils/constants";
 
 class AccountService {
-  async getAllAccounts() {
+  async getAllAccounts(): Promise<AccountType[]> {
     return accountModel.aggregate([
       {
         $sort: { createdAt: -1 },
@@ -10,7 +10,7 @@ class AccountService {
     ]);
   }
 
-  async getAccountById(id: string) {
+  async getAccountById(id: string): Promise<AccountType | null> {
     return accountModel.findById(id);
   }
 
@@ -18,11 +18,7 @@ class AccountService {
     name,
     type,
     balance = 0,
-  }: {
-    name: string;
-    type: keyof typeof ACCOUNT_TYPES;
-    balance: number;
-  }) {
+  }: AccountType): Promise<AccountType> {
     if (isNaN(balance)) {
       throw new Error("Balance must be a number");
     }
@@ -43,7 +39,11 @@ class AccountService {
       );
     }
 
-    return accountModel.create({ name, type, balance });
+    return accountModel.create({
+      name,
+      type,
+      balance,
+    }) as unknown as AccountType;
   }
 }
 
